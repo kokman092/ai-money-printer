@@ -1,0 +1,4 @@
+timestamp,client_id,company_name,fix_id,fix_type,error_summary,amount_usd,status,execution_time_ms,rows_affected
+2026-01-20T23:07:48.517459,client_34e570c47295af2d,TestCorp,support_6205353ebced,customer_support,"{'customer_name': 'John Doe', 'customer_email': None, 'issue': ""I haven't received my refund for ord",0.99,completed,6905.022859573364,0
+2026-01-20T23:08:26.510068,client_a670e21be126bd22,TestCorp,support_08c4aa3f5182,customer_support,"{'customer_name': 'John Doe', 'customer_email': None, 'issue': ""I haven't received my refund for ord",0.99,completed,6799.208879470825,0
+2026-01-21T00:03:45.809893,client_2b97e2e847014f7f,TestCorp,sales_72354500a640,sales_agent,"{'lead_name': 'Sarah Smith', 'lead_email': 'sarah@enterprise.com', 'company': 'BigCorp', 'inquiry': ",2.5,completed,6929.041624069214,0

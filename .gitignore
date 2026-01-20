@@ -1,0 +1,28 @@
+# Environment and secrets
+.env
+*.env.local
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+.Python
+*.so
+.venv/
+venv/
+ENV/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Data files with sensitive info (keep structure, not content)
+# Uncomment these if you want to exclude data:
+# data/client_vault.json
+# data/billing_log.csv

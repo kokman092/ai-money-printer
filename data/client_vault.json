@@ -1,0 +1,96 @@
+{
+  "clients": {
+    "client_5c51006d83c97530": {
+      "client_id": "client_5c51006d83c97530",
+      "company_name": "TestCorp",
+      "api_key_hash": "5f8af9886efb87337a3caccd53f60b17c1add5a8b8610f11c7cd14e1ea2785ac",
+      "webhook_secret": "JFK0qHnDxAUs2EA7F6Y7fg",
+      "database_type": "sqlite",
+      "connection_string_encrypted": "HQ4BE3BHVywWVxAH",
+      "is_active": true,
+      "created_at": "2026-01-20T22:42:20.361373",
+      "last_activity": "2026-01-20T22:42:20.744800",
+      "total_fixes": 0,
+      "total_billed": 0.0,
+      "plan": "per-fix"
+    },
+    "client_5cc36f1ddd9875f6": {
+      "client_id": "client_5cc36f1ddd9875f6",
+      "company_name": "TestCorp",
+      "api_key_hash": "3d78075f18f9cb04795e5186abe0474e085b4e08dbf216bdfdb78be9d9c3fbc8",
+      "webhook_secret": "Smv3eOp5Q__-3W_11KLNcw",
+      "database_type": "sqlite",
+      "connection_string_encrypted": "HQ4BE3BHVywWVxAH",
+      "is_active": true,
+      "created_at": "2026-01-20T22:50:44.602511",
+      "last_activity": "2026-01-20T22:50:45.024294",
+      "total_fixes": 0,
+      "total_billed": 0.0,
+      "plan": "per-fix"
+    },
+    "client_2b97e2e847014f7f": {
+      "client_id": "client_2b97e2e847014f7f",
+      "company_name": "TestCorp",
+      "api_key_hash": "a8d6773843dbda3b396ff606fea01056c3c59094c55996fbe6eb34a4a919b150",
+      "webhook_secret": "vZXQs54BETdCoCcV9E6nFg",
+      "database_type": "sqlite",
+      "connection_string_encrypted": "HQ4BE3BHVywWVxAH",
+      "is_active": true,
+      "created_at": "2026-01-20T23:03:14.497660",
+      "last_activity": "2026-01-21T00:03:47.881268",
+      "total_fixes": 1,
+      "total_billed": 2.5,
+      "plan": "per-fix"
+    },
+    "client_34e570c47295af2d": {
+      "client_id": "client_34e570c47295af2d",
+      "company_name": "TestCorp",
+      "api_key_hash": "883ff89f63aed2e15532b5690a8c2d03ddc593838b7a271b6626c9e2fa60f61e",
+      "webhook_secret": "dGHXMim2VZLAb9gnNzgE_g",
+      "database_type": "sqlite",
+      "connection_string_encrypted": "HQ4BE3BHVywWVxAH",
+      "is_active": true,
+      "created_at": "2026-01-20T23:07:41.578579",
+      "last_activity": "2026-01-20T23:07:51.424467",
+      "total_fixes": 1,
+      "total_billed": 0.99,
+      "plan": "per-fix"
+    },
+    "client_a670e21be126bd22": {
+      "client_id": "client_a670e21be126bd22",
+      "company_name": "TestCorp",
+      "api_key_hash": "9ef475e072d7f508ac92d81fafc6f420a6ebe0d205db1cd80653260b49b254ae",
+      "webhook_secret": "GlFcCR7OL_ejNi4QiGlDeQ",
+      "database_type": "sqlite",
+      "connection_string_encrypted": "HQ4BE3BHVywWVxAH",
+      "is_active": true,
+      "created_at": "2026-01-20T23:08:19.662216",
+      "last_activity": "2026-01-20T23:08:28.967270",
+      "total_fixes": 1,
+      "total_billed": 0.99,
+      "plan": "per-fix"
+    },
+    "client_e570f1bacc5633c7": {
+      "client_id": "client_e570f1bacc5633c7",
+      "company_name": "TestCorp",
+      "api_key_hash": "343bf95474fa4b6defb7ab895d584ac11735e949b8f344af0037d8f8ad1ed346",
+      "webhook_secret": "v52Y4Q3yA2JvrCRJsTe2rA",
+      "database_type": "sqlite",
+      "connection_string_encrypted": "HQ4BE3BHVywWVxAH",
+      "is_active": true,
+      "created_at": "2026-01-20T23:50:38.854540",
+      "last_activity": "2026-01-20T23:50:39.312172",
+      "total_fixes": 0,
+      "total_billed": 0.0,
+      "plan": "per-fix"
+    }
+  },
+  "api_keys": {
+    "5f8af9886efb87337a3caccd53f60b17c1add5a8b8610f11c7cd14e1ea2785ac": "client_5c51006d83c97530",
+    "3d78075f18f9cb04795e5186abe0474e085b4e08dbf216bdfdb78be9d9c3fbc8": "client_5cc36f1ddd9875f6",
+    "a8d6773843dbda3b396ff606fea01056c3c59094c55996fbe6eb34a4a919b150": "client_2b97e2e847014f7f",
+    "883ff89f63aed2e15532b5690a8c2d03ddc593838b7a271b6626c9e2fa60f61e": "client_34e570c47295af2d",
+    "9ef475e072d7f508ac92d81fafc6f420a6ebe0d205db1cd80653260b49b254ae": "client_a670e21be126bd22",
+    "343bf95474fa4b6defb7ab895d584ac11735e949b8f344af0037d8f8ad1ed346": "client_e570f1bacc5633c7"
+  }
+}
