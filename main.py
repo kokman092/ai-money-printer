@@ -273,6 +273,12 @@ async def health():
     return {"status": "healthy", "timestamp": datetime.now().isoformat()}
 
 
+@app.get("/favicon.ico")
+async def favicon():
+    """Return empty response for favicon requests to prevent 404 logs."""
+    return JSONResponse(content={}, status_code=204)
+
+
 @app.post("/webhook/fix", response_model=FixResponse)
 async def receive_error(
     error_report: ErrorReport,
