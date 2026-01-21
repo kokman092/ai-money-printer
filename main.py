@@ -12,7 +12,7 @@ from datetime import datetime
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI, HTTPException, Header, BackgroundTasks, Request
-from fastapi.responses import JSONResponse, FileResponse
+from fastapi.responses import JSONResponse, FileResponse, HTMLResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, Field
 from dotenv import load_dotenv
@@ -266,7 +266,9 @@ async def root():
     """Serve the landing page."""
     landing_page = pathlib.Path(__file__).parent / "static" / "landing.html"
     if landing_page.exists():
-        return FileResponse(landing_page, media_type="text/html")
+        # Read content directly to avoid Content-Length mismatch issues
+        content = landing_page.read_text(encoding="utf-8")
+        return HTMLResponse(content=content)
     
     # Fallback to JSON stats if landing page doesn't exist
     billing = get_billing()
