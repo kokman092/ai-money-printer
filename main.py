@@ -27,6 +27,7 @@ from core.agents import AgentType, get_agent_config, list_available_agents
 from tools.scout import get_vault, ClientVault
 from tools.database_fixer import get_fixer, DatabaseFixer
 from tools.billing import get_billing, BillingSystem
+from tools.lead_hunter import get_hunter, LeadHunter
 
 
 # =============================================================================
@@ -789,6 +790,73 @@ The money is now in your wallet! 🚀
 
 
 # =============================================================================
+# LEAD HUNTER ENDPOINTS - Autonomous Customer Acquisition
+# =============================================================================
+
+@app.post("/hunter/run")
+async def run_lead_hunter(
+    background_tasks: BackgroundTasks,
+    x_api_key: str = Header(...)
+):
+    """
+    Manually trigger a lead hunting cycle.
+    Searches Reddit for potential customers and sends outreach.
+    """
+    if x_api_key != os.getenv("WEBHOOK_SECRET"):
+        raise HTTPException(status_code=401, detail="Admin access required")
+    
+    hunter = get_hunter()
+    
+    # Run in background
+    background_tasks.add_task(hunter.run_hunting_cycle)
+    
+    return {
+        "status": "started",
+        "message": "Lead hunting cycle started in background. Check Telegram for notifications."
+    }
+
+
+@app.get("/hunter/stats")
+async def get_hunter_stats(x_api_key: str = Header(...)):
+    """Get lead hunting statistics."""
+    if x_api_key != os.getenv("WEBHOOK_SECRET"):
+        raise HTTPException(status_code=401, detail="Admin access required")
+    
+    hunter = get_hunter()
+    return hunter.get_stats()
+
+
+@app.get("/hunter/leads")
+async def list_leads(
+    status: str = None,
+    limit: int = 20,
+    x_api_key: str = Header(...)
+):
+    """List leads with optional status filter."""
+    if x_api_key != os.getenv("WEBHOOK_SECRET"):
+        raise HTTPException(status_code=401, detail="Admin access required")
+    
+    hunter = get_hunter()
+    leads = hunter._load_leads()
+    
+    if status:
+        leads = [l for l in leads if l.status == status]
+    
+    return [
+        {
+            "lead_id": l.lead_id,
+            "platform": l.platform,
+            "username": l.username,
+            "status": l.status,
+            "keywords": l.keywords_matched,
+            "post_url": l.post_url,
+            "created_at": l.created_at
+        }
+        for l in leads[-limit:]
+    ]
+
+
+# =============================================================================
 # RUN THE SERVER
 # =============================================================================
 
@@ -810,6 +878,7 @@ if __name__ == "__main__":
     ║     📈 Sales Agent       - $2.50/meeting                  ║
     ║     📧 Email Responder   - $0.50/email                    ║
     ║     📅 Appointment Setter - $1.50/booking                 ║
+    ║     🎯 Lead Hunter       - FINDS CUSTOMERS FOR YOU        ║
     ║                                                           ║
     ╚═══════════════════════════════════════════════════════════╝
     """)
