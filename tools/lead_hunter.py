@@ -169,9 +169,14 @@ class LeadHunter:
         """
         new_leads = []
         
-        async with httpx.AsyncClient() as client:
-            for subreddit in self.TARGET_SUBREDDITS:
-                for keyword in self.HUNTING_KEYWORDS[:5]:  # Limit to avoid rate limiting
+        # Better User-Agent for Reddit (required by Reddit API)
+        headers = {
+            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
+        }
+        
+        async with httpx.AsyncClient(timeout=30) as client:
+            for subreddit in self.TARGET_SUBREDDITS[:5]:  # Limit subreddits to avoid rate limits
+                for keyword in self.HUNTING_KEYWORDS[:3]:  # Limit keywords
                     try:
                         # Reddit JSON API (no auth needed for public posts)
                         url = f"https://www.reddit.com/r/{subreddit}/search.json"
@@ -179,16 +184,24 @@ class LeadHunter:
                             "q": keyword,
                             "restrict_sr": "on",
                             "sort": "new",
-                            "limit": 10,
-                            "t": "week"  # Last week
+                            "limit": 5,
+                            "t": "month"  # Last month for more results
                         }
-                        headers = {"User-Agent": "LeadHunter/1.0"}
                         
+                        print(f"🔍 Searching r/{subreddit} for '{keyword}'...")
                         response = await client.get(url, params=params, headers=headers)
+                        
+                        print(f"   Response status: {response.status_code}")
+                        
+                        if response.status_code == 429:
+                            print(f"⏳ Rate limited by Reddit, waiting 60s...")
+                            await asyncio.sleep(60)
+                            continue
                         
                         if response.status_code == 200:
                             data = response.json()
                             posts = data.get("data", {}).get("children", [])
+                            print(f"   Found {len(posts)} posts")
                             
                             for post in posts:
                                 post_data = post.get("data", {})
@@ -197,7 +210,7 @@ class LeadHunter:
                                 content = f"{post_data.get('title', '')} {post_data.get('selftext', '')}"
                                 
                                 # Skip deleted/removed
-                                if username in ["[deleted]", "AutoModerator"]:
+                                if username in ["[deleted]", "AutoModerator", ""]:
                                     continue
                                 
                                 lead_id = self._generate_lead_id("reddit", username, post_url)
@@ -205,33 +218,41 @@ class LeadHunter:
                                 if self._is_duplicate(lead_id):
                                     continue
                                 
-                                # Find which keywords matched
-                                matched = [kw for kw in self.HUNTING_KEYWORDS if kw.lower() in content.lower()]
+                                # The post was returned by Reddit search for this keyword
+                                # So we consider it a match even if exact phrase isn't in content
+                                matched = [keyword]  # The search keyword matched
                                 
-                                if matched:
-                                    lead = Lead(
-                                        lead_id=lead_id,
-                                        platform="reddit",
-                                        username=username,
-                                        email=None,  # Reddit doesn't expose emails
-                                        post_content=content[:500],
-                                        post_url=post_url,
-                                        keywords_matched=matched,
-                                        status="new",
-                                        first_contact_date=None,
-                                        last_contact_date=None,
-                                        follow_up_count=0,
-                                        notes="",
-                                        created_at=datetime.now().isoformat()
-                                    )
-                                    new_leads.append(lead)
-                                    self._save_lead(lead)
+                                # Also check for other keywords in content
+                                for kw in self.HUNTING_KEYWORDS:
+                                    if kw.lower() in content.lower() and kw not in matched:
+                                        matched.append(kw)
+                                
+                                lead = Lead(
+                                    lead_id=lead_id,
+                                    platform="reddit",
+                                    username=username,
+                                    email=None,  # Reddit doesn't expose emails
+                                    post_content=content[:500],
+                                    post_url=post_url,
+                                    keywords_matched=matched,
+                                    status="new",
+                                    first_contact_date=None,
+                                    last_contact_date=None,
+                                    follow_up_count=0,
+                                    notes="",
+                                    created_at=datetime.now().isoformat()
+                                )
+                                new_leads.append(lead)
+                                self._save_lead(lead)
+                                print(f"   ✅ Found lead: u/{username} - {matched}")
+                        else:
+                            print(f"   ❌ Error: {response.status_code}")
                         
-                        # Rate limiting
-                        await asyncio.sleep(2)
+                        # Rate limiting - be respectful to Reddit
+                        await asyncio.sleep(3)
                         
                     except Exception as e:
-                        print(f"Error hunting r/{subreddit}: {e}")
+                        print(f"❌ Error hunting r/{subreddit}: {e}")
                         continue
         
         return new_leads

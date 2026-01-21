@@ -1,0 +1,127 @@
+lead_id,platform,username,email,post_content,post_url,keywords_matched,status,first_contact_date,last_contact_date,follow_up_count,notes,created_at
+06475cdbaed0,reddit,Sengchor,,"How I Implemented Subscription &amp; Credit Management in My 3D Modeling Web App 1. **Backend:**
+   * Built using **Supabase Edge Functions** (Deno runtime).
+   * Handles authentication, user management, and subscription logic.
+2. **Payments:**
+   * Integrated **Paddle** as the merchant of record and payment gateway.
+   * Webhooks verify transactions and subscription updates securely using HMAC-SHA256 signatures.
+3. **Credit System:**
+   * New users start with **20 credits**.
+   * Each 3D model ",https://reddit.com/r/webdev/comments/1qf2ojx/how_i_implemented_subscription_credit_management/,"[""database error""]",new,,,0,,2026-01-21T17:46:36.913107
+04b11f45cf5a,reddit,RevillWeb,,"I built “Strava for Wildlife” to learn what AI does right and what it gets wrong (My findings on the ""Stability Tax"") Hey everyone,
+
+I’m a tech leader who has been skeptical about the ""AI will replace us"" narrative. I wanted to see if AI actually makes developers faster or if it just helps us ship bad code quicker. So, I ran an experiment: I built a complex, enterprise-scale platform from scratch using **Gemini** (for architecture/planning) and **Cursor** (for implementation).
+
+The result is **U",https://reddit.com/r/webdev/comments/1q98jsv/i_built_strava_for_wildlife_to_learn_what_ai_does/,"[""database error""]",new,,,0,,2026-01-21T17:46:37.003324
+a271ddaf6438,reddit,Motor_Lab6074,,"Backend Issues with Railway and Express – Complicated Deployment Hello, I’m a beginner developer, and for one of my first projects, I need to create an app with a backend. The thing is, everything works perfectly fine in localhost—it’s an automatic scraping script using Puppeteer.
+
+I’m using:
+
+* **Vercel** for the frontend,
+* **Supabase** for the database,
+* **Railway** for the backend.
+
+When I push my backend to production via GitHub, it builds correctly, but my scrapes—which run smoothly local",https://reddit.com/r/webdev/comments/1q98dy0/backend_issues_with_railway_and_express/,"[""database error""]",new,,,0,,2026-01-21T17:46:37.032213
+13aceaf0b30f,reddit,gadget_dev,,"How to spin up a scalable backend for Swift apps (Technical Walkthrough) Hey r/webdev, I’m from the dev team at Gadget. We usually build tools for the JavaScript/web ecosystem, but we recently went down a rabbit hole seeing how our infrastructure handles native mobile apps.
+
+We put together a project building a pushup tracker (because swole is the goal), and I wanted to break down the architecture and specific implementation details here for anyone interested in cross-platform backends or moving",https://reddit.com/r/webdev/comments/1q6jfbw/how_to_spin_up_a_scalable_backend_for_swift_apps/,"[""database error""]",new,,,0,,2026-01-21T17:46:37.057823
+9186b0a9a0ac,reddit,Myworkacc215,,"Anybody else having database connection problems with Render? I run a small project with limited traffic. For this a free instance on Render and Supabase is enough. Now sometime in the past days it looks like that Render cannot connect to Supabase anymore with the Session Pooler?
+
+Stack: Node.js (Render) + Postgres (Supabase - AWS EU West)
+
+Everything was working well for two months and then suddenly it stopped working. Both instances were running the whole time.
+
+The Supabase Pooler continued t",https://reddit.com/r/webdev/comments/1q5bhfc/anybody_else_having_database_connection_problems/,"[""database error""]",new,,,0,,2026-01-21T17:46:37.096286
+4e325b2e196a,reddit,Cautious-Control-419,,"Now the portfolio perfectly resembles a VS Code style IDE. Demo: [arnav-portfolio](https://arnofrxdd.github.io/ide-portfolio/)  
+Github: [arnofrxdd/ide-portfolio: VS Code–inspired portfolio template.](https://github.com/arnofrxdd/ide-portfolio)",https://reddit.com/r/webdev/comments/1qdygue/now_the_portfolio_perfectly_resembles_a_vs_code/,"[""sql error""]",new,,,0,,2026-01-21T17:46:40.497289
+36eaa2fe5e94,reddit,Altruistic_Ad8849,,"Replit-provisioned Neon database suddenly disabled - anyone else experience this? Hey everyone,
+
+I'm running a production app on Replit that uses the PostgreSQL database they provision (hosted on Neon). Today I woke up to find my database completely inaccessible with this error:
+
+&gt;
+
+The frustrating part is that since the database was provisioned through Replit, I don't have direct access to the Neon console to re-enable it myself. I'm now waiting on Replit support to help.
+
+**Some context:**
+",https://reddit.com/r/webdev/comments/1q50r8z/replitprovisioned_neon_database_suddenly_disabled/,"[""sql error""]",new,,,0,,2026-01-21T17:46:40.526338
+48fd979f5678,reddit,decentralizedbee,,"When 500 search results need to become 20, how do you pick which 20? This problem seemed simple until I actually tried to solve it properly.
+
+The context is LLM agents. When an agent uses tools - searching codebases, querying APIs, fetching logs - those tools often return hundreds or thousands of items. You can't stuff everything into the prompt. Context windows have limits, and even when they don't, you're paying per token.
+
+So you need to shrink the data. 500 items become 20. But which 20?
+
+**",https://reddit.com/r/programming/comments/1qc5orc/when_500_search_results_need_to_become_20_how_do/,"[""database error""]",new,,,0,,2026-01-21T17:46:47.262940
+b7b55517c5d0,reddit,IdeaAffectionate945,,"My experiences with manually creating almost 50,000 training files for fine-tuning OpenAI GPT-4.1-mini - AMA In 2025 I manually curated a dataset of 46,787 Hyperlambda files (my DSL) to fine tune OpenAI's GPT-4.1-mini. Since I basically *""wasted""* my first $10,000 on teaching myself how to do this, I figured I'd share my findings such that others can have a more pleasant experience.
+
+**1. Curating your dataset**
+
+When fine-tuning an LLM on a DSL you will need data, **lots of data**. Somewhere ar",https://reddit.com/r/programming/comments/1q69inl/my_experiences_with_manually_creating_almost/,"[""database error""]",new,,,0,,2026-01-21T17:46:47.294781
+b4077715a190,reddit,Ogretribe,,"Daily B2B Intelligence: 3 ""Unfair Gaps"" bleeding money right now (Logistics, Healthcare, Alcohol) I analyze millions of regulatory signals to track **""Unfair Gaps""** \- specific operational points where businesses are legally or structurally forced to lose money. Most founders look for ""ideas"". I look for verified liabilities.
+
+Here are 3 validated gaps from today's analysis.
+
+**1. The ""Customs Bottleneck"" (International Trade)**
+
+* **Pain:** Lost operational capacity and throughput from manual ",https://reddit.com/r/SaaS/comments/1qijg70/daily_b2b_intelligence_3_unfair_gaps_bleeding/,"[""database error""]",new,,,0,,2026-01-21T17:47:07.757463
+710267400545,reddit,justdoitbro_,,"Your product isn't missing features. It's crashing every 2 minutes. Here is why stability beats features every time. My friend have been running a B2B SaaS for 14 months. Last week, he finally hit $3k MRR. But 6 months ago, he was losing customers faster than he could sign them up.
+
+The turning point came when I realized I was solving the wrong problem.
+
+### The Diagnosis
+
+He honestly thought customers were leaving because we lacked features. He was wrong. For 3 months, he kept adding new functi",https://reddit.com/r/SaaS/comments/1qfc0wi/your_product_isnt_missing_features_its_crashing/,"[""database error""]",new,,,0,,2026-01-21T17:47:07.785422
+5b135d2df5e7,reddit,Ancient_Routine8576,,"I just audited a failed SaaS MVP built by a ""$15/hr expert"". Here is the brutal truth for non-tech founders. To respect community rules, I have detailed the 3 key red flags below so you don't have to click the link to get value.
+
+
+
+Last week, a founder reached out to me in panic. His SaaS backend was crashing every time they hit 50 concurrent users. He had spent 3 months and burned his budget on a ""budget-friendly"" developer.
+
+As a Full Stack Engineer who often gets called into ""save"" projects, ",https://reddit.com/r/SaaS/comments/1qegyw9/i_just_audited_a_failed_saas_mvp_built_by_a_15hr/,"[""database error""]",new,,,0,,2026-01-21T17:47:07.813796
+a8c65246d5b5,reddit,NeedleworkerThis9104,,"CodeVibes Update: Hit 89% precision after building a 316-vulnerability stress test Quick update on CodeVibes (the free AI code auditor I shared 4 days ago).
+
+**What we've been working on:**
+
+Built a brutal benchmark to make the AI actually reliable. 316 intentionally vulnerable patterns across 16 files. Not your average test suite.
+
+**Why 316 vulnerabilities?**
+
+We test EVERY edge case:
+
+* 25 different hardcoded secret formats (AWS keys, GitHub tokens, Stripe secrets, SSH keys, JWTs, database co",https://reddit.com/r/SaaS/comments/1q9zr0s/codevibes_update_hit_89_precision_after_building/,"[""database error""]",new,,,0,,2026-01-21T17:47:07.840823
+017402c49622,reddit,cloudairyhq,,"We banned PRDs that were textual. In 2026, if you can’t draw the logic flow, you can’t code it. We run a SaaS that builds workspace tools (Diagramming focus) so we can see how thousands of teams work.
+
+A clear pattern has emerged in 2026: The ""Text-Heavy"" teams are drowning.
+
+The cost of code writing has been very low with AI coding agents. Architectural Mistakes has been costly, but not always. If you tell an AI to build a “User System” without a visual map, it will turn into a messy and halluc",https://reddit.com/r/SaaS/comments/1q8v4t1/we_banned_prds_that_were_textual_in_2026_if_you/,"[""database error""]",new,,,0,,2026-01-21T17:47:07.870157
+5fd55297a89b,reddit,NeedleworkerThis9104,,"I built a free AI code auditor because I shipped production code with hardcoded API keys and almost destroyed everything Hey Developers,
+
+So this is embarrassing but also the reason **CodeVibes** exists.
+
+Three months ago I used ChatGPT to ship a feature in 3 hours that would've taken me 2 weeks. Felt like a productivity god. Tests passed, users were happy, I moved on to the next thing.
+
+Last week I actually sat down and READ that code.
+
+The nightmare I found:
+
+* API keys hardcoded directly in m",https://reddit.com/r/SaaS/comments/1q9rgsj/i_built_a_free_ai_code_auditor_because_i_shipped/,"[""sql error""]",new,,,0,,2026-01-21T17:47:11.524717
+187bf9805f26,reddit,AkwasiAsante,,"How I built and launched a feature-complete Micro-SaaS in 8 days. I’ve spent years as a freelancer struggling with ""Enterprise"" CRMs that were too complex and invoicing tools that felt clunky. 8 days ago, I decided to stop complaining and start building. Today, I’m launching Wyllflow.
+
+​The Goal:
+Create a high-speed, dark-mode first tool that focuses strictly on two things: Lead Flow and Cash Flow. No bloat, no 50-step menus.
+
+​The Tech Stack:
+​Frontend: Next.js &amp; Tailwind CSS
+​Database &amp",https://reddit.com/r/SaaS/comments/1q69xs4/how_i_built_and_launched_a_featurecomplete/,"[""sql error""]",new,,,0,,2026-01-21T17:47:11.552961
+89874d10268a,reddit,Awkward_Ad_9605,,"Vibe-coding is incredible. But here's where most founders hit a wall. I've been reviewing code from AI tools like Cursor, v0, Lovable, and Bolt. The output is genuinely impressive for prototyping.
+
+But after doing 500+ code reviews over my career, I keep seeing the same patterns when these apps need to go live:
+
+What vibe-coded MVPs typically miss:
+
+1. Security basics - No input validation, SQL injection vulnerabilities, exposed API keys in frontend code, missing rate limiting
+2. Error handling ",https://reddit.com/r/SaaS/comments/1q554oh/vibecoding_is_incredible_but_heres_where_most/,"[""sql error""]",new,,,0,,2026-01-21T17:47:11.577942
+9bf7e3663d42,reddit,Ayu_theindieDev,,"I’ve found the Goldilocks stack for Cursor/Windsurf (Next 15 + Tailwind v4 + Agnostic DBs). Is it just me, or does Cursor start getting ""confused"" the moment your project hits a certain level of complexity?
+
+I’ve spent the last few months obsessed with one goal: Zero-prompt engineering. I wanted to see if I could get Windsurf to build an entire feature (like a team management system) in one go without it hallucinating halfway through.
+
+What I realized is that most boilerplates are ""AI-hostile."" ",https://reddit.com/r/SaaS/comments/1qdfp6k/ive_found_the_goldilocks_stack_for_cursorwindsurf/,"[""sqlite error""]",new,,,0,,2026-01-21T17:47:14.950791
