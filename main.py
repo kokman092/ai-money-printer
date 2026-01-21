@@ -12,7 +12,8 @@ from datetime import datetime
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI, HTTPException, Header, BackgroundTasks, Request
-from fastapi.responses import JSONResponse
+from fastapi.responses import JSONResponse, FileResponse
+from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, Field
 from dotenv import load_dotenv
 
@@ -253,12 +254,23 @@ async def process_fix(
 # API ENDPOINTS
 # =============================================================================
 
-@app.get("/", response_model=HealthResponse)
+# Mount static files for landing page assets
+import pathlib
+static_dir = pathlib.Path(__file__).parent / "static"
+if static_dir.exists():
+    app.mount("/static", StaticFiles(directory=str(static_dir)), name="static")
+
+
+@app.get("/")
 async def root():
-    """Health check and stats endpoint."""
+    """Serve the landing page."""
+    landing_page = pathlib.Path(__file__).parent / "static" / "landing.html"
+    if landing_page.exists():
+        return FileResponse(landing_page, media_type="text/html")
+    
+    # Fallback to JSON stats if landing page doesn't exist
     billing = get_billing()
     stats = billing.get_stats()
-    
     return HealthResponse(
         status="running",
         timestamp=datetime.now().isoformat(),
