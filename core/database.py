@@ -14,7 +14,13 @@ load_dotenv()
 
 # Get DB URL from env (Railway provides DATABASE_URL)
 # If using psycopg2 locally, might need to replace 'postgres://' with 'postgresql+asyncpg://'
-DATABASE_URL = os.getenv("DATABASE_URL", "postgresql+asyncpg://user:pass@localhost/dbname").replace("postgres://", "postgresql+asyncpg://")
+raw_url = os.getenv("DATABASE_URL", "postgresql+asyncpg://user:pass@localhost/dbname")
+if raw_url.startswith("postgres://"):
+    DATABASE_URL = raw_url.replace("postgres://", "postgresql+asyncpg://", 1)
+elif raw_url.startswith("postgresql://"):
+    DATABASE_URL = raw_url.replace("postgresql://", "postgresql+asyncpg://", 1)
+else:
+    DATABASE_URL = raw_url
 
 # Create Async Engine
 engine = create_async_engine(DATABASE_URL, echo=False)
