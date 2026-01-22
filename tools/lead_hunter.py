@@ -64,6 +64,9 @@ class LeadHunter:
         "urgent help needed coding", "developer needed asap"
     ]
     
+    # Dynamic list that gets updated
+    DYNAMIC_TRENDS = []
+    
     TARGET_SUBREDDITS = [
         "webdev", "programming", "learnprogramming", "SaaS", "startups",
         "Entrepreneur", "smallbusiness", "techsupport", "database", "sql",
@@ -174,8 +177,11 @@ class LeadHunter:
         }
         
         async with httpx.AsyncClient(timeout=30) as client:
+            # Combine static + dynamic keywords
+            all_keywords = self.HUNTING_KEYWORDS + self.DYNAMIC_TRENDS
+            
             for subreddit in self.TARGET_SUBREDDITS[:5]:
-                for keyword in self.HUNTING_KEYWORDS[:3]:
+                for keyword in all_keywords[:10]: # Limit for rate limits
                     try:
                         url = f"https://www.reddit.com/r/{subreddit}/search.json"
                         params = {"q": keyword, "restrict_sr": "on", "sort": "new", "limit": 5, "t": "month"}
@@ -277,9 +283,64 @@ Don't use greetings or subject lines."""
                 )
         except: pass
 
+    async def scan_for_trends(self):
+        """
+        AI Trend Surfer 🏄
+        Scans broad tech subreddits for 'hot' topics and identifies profitable trends.
+        """
+        print("🏄 Scanning for trending problems...")
+        trend_sources = ["technology", "artificial", "ChatGPT", "startups"]
+        headers = {"User-Agent": "Mozilla/5.0"}
+        
+        combined_titles = ""
+        
+        try:
+            async with httpx.AsyncClient(timeout=10) as client:
+                for sub in trend_sources:
+                    url = f"https://www.reddit.com/r/{sub}/hot.json?limit=5"
+                    resp = await client.get(url, headers=headers)
+                    if resp.status_code == 200:
+                        posts = resp.json().get("data", {}).get("children", [])
+                        for p in posts:
+                            combined_titles += p["data"].get("title", "") + "\n"
+        except Exception as e:
+            print(f"⚠️ Trend scan failed: {e}")
+            return
+
+        # Ask AI to identify profitable keywords
+        if self.openrouter_key and combined_titles:
+            prompt = f"""
+            Analyze these recent tech post titles:\n{combined_titles}\n
+            Identify 3 specific, technical problems or emerging tools people are struggling with RIGHT NOW.
+            Return ONLY 3 short keyword phrases (e.g. "openai api error", "langchain bug", "vector db setup").
+            Separated by commas. No other text.
+            """
+            try:
+                async with httpx.AsyncClient() as client:
+                    response = await client.post(
+                        "https://openrouter.ai/api/v1/chat/completions",
+                        headers={"Authorization": f"Bearer {self.openrouter_key}"},
+                        json={"model": "deepseek/deepseek-chat", "messages": [{"role": "user", "content": prompt}]}
+                    )
+                    if response.status_code == 200:
+                        content = response.json()["choices"][0]["message"]["content"]
+                        new_trends = [k.strip() for k in content.split(",") if k.strip()]
+                        
+                        # Update dynamic list
+                        self.DYNAMIC_TRENDS = new_trends[:3]
+                        print(f"🔥 TRENDS DETECTED: {self.DYNAMIC_TRENDS}")
+                        await self._send_telegram_alert(f"🏄 **Trend Alert**\nSurfing these new waves: {self.DYNAMIC_TRENDS}")
+            except Exception as e:
+                print(f"⚠️ Trend analysis failed: {e}")
+
     async def run_hunting_cycle(self):
         """Main hunting cycle."""
         print("🎯 Starting lead hunting cycle...")
+        
+        # 1. Update Trends
+        await self.scan_for_trends()
+        
+        # 2. Hunt
         new_leads = await self.hunt_reddit()
         
         for lead in new_leads:
