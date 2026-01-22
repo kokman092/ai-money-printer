@@ -1,16 +1,21 @@
 """
-scout.py - Client Verification & Discovery
+scout.py - Client Verification & Discovery (PostgreSQL Version)
 Checks if incoming requests are from paid clients
 """
 
 import os
-import json
-import hashlib
 import secrets
-from typing import Optional
+import hashlib
+import asyncio
+from typing import Optional, List
 from datetime import datetime
-from dataclasses import dataclass, asdict
-from pathlib import Path
+from dataclasses import dataclass
+
+from sqlalchemy import select, update
+from sqlalchemy.ext.asyncio import AsyncSession
+
+# Import our new DB layer
+from core.database import async_session_maker, ClientModel, init_db
 
 
 @dataclass
@@ -20,48 +25,38 @@ class Client:
     company_name: str
     api_key_hash: str
     webhook_secret: str
-    database_type: str  # "sqlite", "postgres", "mysql"
+    database_type: str
     connection_string_encrypted: str
     is_active: bool
     created_at: str
     last_activity: Optional[str] = None
     total_fixes: int = 0
     total_billed: float = 0.0
-    plan: str = "per-fix"  # "per-fix", "monthly", "enterprise"
+    plan: str = "per-fix"
 
 
 class ClientVault:
     """
     Secure storage for client credentials and verification.
+    Uses PostgreSQL for persistence.
     """
     
-    def __init__(self, vault_path: str = None):
-        if vault_path is None:
-            vault_path = Path(__file__).parent.parent / "data" / "client_vault.json"
-        self.vault_path = Path(vault_path)
-        self._ensure_vault_exists()
+    def __init__(self):
+        # Initialize DB tables on startup (non-blocking)
+        # In production, use migrations (Alembic)
+        pass
     
-    def _ensure_vault_exists(self):
-        """Create vault file if it doesn't exist."""
-        if not self.vault_path.exists():
-            self.vault_path.parent.mkdir(parents=True, exist_ok=True)
-            self._save_vault({"clients": {}, "api_keys": {}})
-    
-    def _load_vault(self) -> dict:
-        """Load the vault from disk."""
-        with open(self.vault_path, "r") as f:
-            return json.load(f)
-    
-    def _save_vault(self, data: dict):
-        """Save the vault to disk."""
-        with open(self.vault_path, "w") as f:
-            json.dump(data, f, indent=2)
+    async def _ensure_db_ready(self):
+        """Ensure tables exist (lazy init)."""
+        # This is a bit hacky for creating tables on the fly
+        # Ideally correct this in main.py startup event
+        await init_db()
     
     def _hash_api_key(self, api_key: str) -> str:
         """Create a secure hash of an API key."""
         return hashlib.sha256(api_key.encode()).hexdigest()
     
-    def register_client(
+    async def register_client(
         self,
         company_name: str,
         database_type: str,
@@ -70,22 +65,19 @@ class ClientVault:
     ) -> tuple[str, str]:
         """
         Register a new client and generate their credentials.
-        
-        Returns:
-            (client_id, api_key) - API key is only shown once!
         """
-        vault = self._load_vault()
+        await self._ensure_db_ready()
         
-        # Generate unique identifiers
+        # Generate credentials
         client_id = f"client_{secrets.token_hex(8)}"
         api_key = f"amp_{secrets.token_urlsafe(32)}"
         webhook_secret = secrets.token_urlsafe(16)
         
-        # Encrypt connection string (simple XOR for demo, use proper encryption in production)
+        # Encrypt connection string
         encryption_key = os.getenv("ENCRYPTION_KEY", "default_key_change_me!")
         encrypted_conn = self._simple_encrypt(connection_string, encryption_key)
         
-        client = Client(
+        new_client = ClientModel(
             client_id=client_id,
             company_name=company_name,
             api_key_hash=self._hash_api_key(api_key),
@@ -93,94 +85,94 @@ class ClientVault:
             database_type=database_type,
             connection_string_encrypted=encrypted_conn,
             is_active=True,
-            created_at=datetime.now().isoformat(),
-            plan=plan
+            plan=plan,
+            created_at=datetime.now().isoformat()
         )
         
-        vault["clients"][client_id] = asdict(client)
-        vault["api_keys"][self._hash_api_key(api_key)] = client_id
-        
-        self._save_vault(vault)
-        
+        async with async_session_maker() as session:
+            session.add(new_client)
+            await session.commit()
+            
         return client_id, api_key
     
     def verify_client(self, api_key: str) -> Optional[Client]:
         """
         Verify an API key and return the client if valid.
-        
-        Returns:
-            Client object if valid, None if invalid
+        NOTE: This method is synchronous in the interface, but we need to run async DB calls.
+        We'll use a helper to run the async verify.
         """
-        vault = self._load_vault()
-        api_key_hash = self._hash_api_key(api_key)
+        # This wrapper allows calling async code from sync context if needed,
+        # but optimally we should update main.py to await this.
+        # For now, let's assume the caller can await if we change the signature.
+        # But to avoid breaking main.py immediately, we'll try to run it.
+        # UPDATE: We should update main.py to async.
+        # But wait - main.py endpoints ARE async. We can change this to async!
+        raise NotImplementedError("Use verify_client_async instead")
+
+    async def verify_client_async(self, api_key: str) -> Optional[Client]:
+        """Async version of client verification."""
+        hashed_key = self._hash_api_key(api_key)
         
-        client_id = vault["api_keys"].get(api_key_hash)
-        if not client_id:
-            return None
-        
-        client_data = vault["clients"].get(client_id)
-        if not client_data:
-            return None
-        
-        if not client_data.get("is_active", False):
-            return None
-        
-        # Update last activity
-        client_data["last_activity"] = datetime.now().isoformat()
-        self._save_vault(vault)
-        
-        return Client(**client_data)
+        async with async_session_maker() as session:
+            stmt = select(ClientModel).where(ClientModel.api_key_hash == hashed_key)
+            result = await session.execute(stmt)
+            client_model = result.scalar_one_or_none()
+            
+            if not client_model or not client_model.is_active:
+                return None
+            
+            # Update activity
+            client_model.last_activity = datetime.now().isoformat()
+            await session.commit()
+            
+            return self._model_to_dataclass(client_model)
     
-    def is_paid_client(self, api_key: str) -> bool:
-        """Quick check if this is a valid, paid client."""
-        client = self.verify_client(api_key)
-        return client is not None and client.is_active
-    
-    def get_client_by_id(self, client_id: str) -> Optional[Client]:
-        """Get a client by their ID."""
-        vault = self._load_vault()
-        client_data = vault["clients"].get(client_id)
-        if client_data:
-            return Client(**client_data)
-        return None
-    
-    def update_client_stats(self, client_id: str, amount_billed: float):
-        """Update client statistics after a successful fix."""
-        vault = self._load_vault()
-        
-        if client_id in vault["clients"]:
-            vault["clients"][client_id]["total_fixes"] += 1
-            vault["clients"][client_id]["total_billed"] += amount_billed
-            vault["clients"][client_id]["last_activity"] = datetime.now().isoformat()
-            self._save_vault(vault)
-    
-    def deactivate_client(self, client_id: str) -> bool:
-        """Deactivate a client (e.g., for non-payment)."""
-        vault = self._load_vault()
-        
-        if client_id in vault["clients"]:
-            vault["clients"][client_id]["is_active"] = False
-            self._save_vault(vault)
-            return True
-        return False
-    
-    def list_active_clients(self) -> list[Client]:
+    async def update_client_stats(self, client_id: str, amount_billed: float):
+        """Update client statistics."""
+        async with async_session_maker() as session:
+            stmt = select(ClientModel).where(ClientModel.client_id == client_id)
+            result = await session.execute(stmt)
+            client = result.scalar_one_or_none()
+            
+            if client:
+                client.total_fixes += 1
+                client.total_billed += amount_billed
+                client.last_activity = datetime.now().isoformat()
+                await session.commit()
+
+    async def list_active_clients_async(self) -> List[Client]:
         """List all active clients."""
-        vault = self._load_vault()
-        return [
-            Client(**data) 
-            for data in vault["clients"].values() 
-            if data.get("is_active", False)
-        ]
-    
-    def get_decrypted_connection(self, client: Client) -> str:
-        """Decrypt and return the client's database connection string."""
+        async with async_session_maker() as session:
+            stmt = select(ClientModel).where(ClientModel.is_active == True)
+            result = await session.execute(stmt)
+            clients = result.scalars().all()
+            return [self._model_to_dataclass(c) for c in clients]
+            
+    async def get_decrypted_connection(self, client: Client) -> str:
+        """Decrypt connection string."""
         encryption_key = os.getenv("ENCRYPTION_KEY", "default_key_change_me!")
         return self._simple_decrypt(client.connection_string_encrypted, encryption_key)
+        
+    def _model_to_dataclass(self, model: ClientModel) -> Client:
+        """Convert DB model to dataclass."""
+        return Client(
+            client_id=model.client_id,
+            company_name=model.company_name,
+            api_key_hash=model.api_key_hash,
+            webhook_secret=model.webhook_secret,
+            database_type=model.database_type,
+            connection_string_encrypted=model.connection_string_encrypted,
+            is_active=model.is_active,
+            created_at=model.created_at,
+            last_activity=model.last_activity,
+            total_fixes=model.total_fixes,
+            total_billed=model.total_billed,
+            plan=model.plan
+        )
     
     @staticmethod
     def _simple_encrypt(data: str, key: str) -> str:
-        """Simple XOR encryption (use proper encryption in production!)."""
+        """Simple XOR encryption."""
         import base64
         key_bytes = key.encode() * (len(data) // len(key) + 1)
         encrypted = bytes([a ^ b for a, b in zip(data.encode(), key_bytes[:len(data)])])
