@@ -139,12 +139,40 @@ async def lifespan(app: FastAPI):
     async def run_hunter_loop():
         print("🏹 Hunter Loop: Initializing...")
         await asyncio.sleep(10) # Wait for server to fully start
+        
+        # Initial Boot Notification
+        try:
+            hunter = get_hunter()
+            await hunter._send_telegram_alert("🚀 **AI Money Printer STARTED**\nmonitoring 12 hours cycle...")
+        except: pass
+
         while True:
             try:
                 hunter = get_hunter()
-                await hunter.run_hunting_cycle()
+                print("🏹 Hunter: Starting scan...")
+                # Run the cycle
+                leads = await hunter.hunt_reddit() # This returns leads found
+                
+                # Check results and notify
+                count = len(leads)
+                if count > 0:
+                    for lead in leads:
+                        msg = await hunter.generate_personalized_message(lead)
+                        await hunter.send_reddit_dm(lead, msg)
+                        await asyncio.sleep(60) # Anti-spam delay
+                    
+                    await hunter._send_telegram_alert(f"💰 **Lead Report**\nFound and contacted {count} potential customers!")
+                else:
+                    print("🏹 Hunter: No new leads found this cycle.")
+                    # Optional: Hourly "I'm alive" heartbeat even if no leads?
+                    # await hunter._send_telegram_alert("💓 System Active. Scanning...")
+                    
             except Exception as e:
                 print(f"❌ Hunter Loop Error: {e}")
+                try:
+                    hunter = get_hunter()
+                    await hunter._send_telegram_alert(f"⚠️ **System Alert**\nHunter loop encountered an error: {e}")
+                except: pass
             
             # Sleep for 1 hour between cycles
             print("💤 Hunter sleeping for 60 minutes...")
