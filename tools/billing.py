@@ -167,6 +167,28 @@ class BillingSystem:
             # Don't fail the billing if Telegram fails
             print(f"Warning: Telegram notification failed: {e}")
     
+    async def get_min_payment_amount(self, currency_from: str = "usd", currency_to: str = "usdttrc20") -> float:
+        """
+        Get the minimum payment amount for a specific currency pair.
+        """
+        api_key = os.getenv("NOWPAYMENTS_API_KEY")
+        if not api_key:
+            return 0.0
+            
+        url = f"https://api.nowpayments.io/v1/min-amount?currency_from={currency_from}&currency_to={currency_to}"
+        headers = {"x-api-key": api_key}
+        
+        try:
+            async with httpx.AsyncClient(timeout=10.0) as client:
+                response = await client.get(url, headers=headers)
+                if response.status_code == 200:
+                    data = response.json()
+                    return float(data.get("min_amount", 0))
+                return 0.0
+        except Exception as e:
+            print(f"⚠️ Failed to check min amount: {e}")
+            return 0.0
+
     async def create_now_invoice(
         self,
         amount: float,
@@ -175,25 +197,23 @@ class BillingSystem:
     ) -> Optional[str]:
         """
         Generates a real crypto payment link via NOWPayments.
-        
-        Args:
-            amount: Amount in USD to charge
-            fix_id: Unique identifier for this fix/order
-            description: Optional description for the invoice
-        
-        Returns:
-            Payment URL if successful, None if failed
         """
         api_key = os.getenv("NOWPAYMENTS_API_KEY")
-        payout_wallet = os.getenv("MY_PAYOUT_WALLET")
+        # payout_wallet = os.getenv("MY_PAYOUT_WALLET") # Removed, using dashboard wallet
         pay_currency = os.getenv("PAY_CURRENCY", "usdttrc20")
         
         if not api_key or api_key == "your_nowpayments_api_key_here":
             print("⚠️ NOWPayments API key not configured in .env")
             return None
+            
+        # 1. Check Minimum Amount Logic
+        min_amount = await self.get_min_payment_amount("usd", pay_currency)
         
-        if not payout_wallet or payout_wallet == "your_crypto_wallet_address_here":
-            print("⚠️ Payout wallet not configured in .env")
+        # Buffer: Add 10% safety margin for price fluctuations
+        safe_min = min_amount * 1.10
+        
+        if amount < safe_min:
+            print(f"⚠️ Billing Skipped: Amount ${amount:.2f} is below network minimum (${safe_min:.2f} for {pay_currency})")
             return None
         
         url = "https://api.nowpayments.io/v1/invoice"

@@ -776,6 +776,31 @@ The money is now in your wallet! 🚀
                     })
             except Exception as e:
                 print(f"⚠️ Telegram notification failed: {e}")
+
+    elif payment_status == "partially_paid":
+        print(f"⚠️ Partial payment received for Order {order_id}")
+        
+        billing = get_billing()
+        if billing.telegram_token and billing.telegram_chat_id:
+            message = f"""⚠️ **PARTIAL PAYMENT RECEIVED**
+
+💳 **Order:** {order_id}
+💰 **Paid:** {actually_paid} {pay_currency.upper()}
+❌ **Expected:** {pay_amount} {pay_currency.upper()}
+
+Action Required: Check NOWPayments dashboard.
+"""
+            try:
+                import httpx
+                url = f"https://api.telegram.org/bot{billing.telegram_token}/sendMessage"
+                async with httpx.AsyncClient() as client:
+                    await client.post(url, json={
+                        "chat_id": billing.telegram_chat_id,
+                        "text": message,
+                        "parse_mode": "Markdown"
+                    })
+            except Exception as e:
+                print(f"⚠️ Telegram notification failed: {e}")
     
     elif payment_status == "waiting":
         print(f"⏳ Waiting for payment: Order {order_id}")
