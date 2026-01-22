@@ -13,8 +13,16 @@ from dotenv import load_dotenv
 load_dotenv()
 
 # Get DB URL from env (Railway provides DATABASE_URL)
-# If using psycopg2 locally, might need to replace 'postgres://' with 'postgresql+asyncpg://'
-raw_url = os.getenv("DATABASE_URL", "postgresql+asyncpg://user:pass@localhost/dbname")
+raw_url = os.getenv("DATABASE_URL")
+
+if not raw_url:
+    print("❌ CRITICAL: DATABASE_URL environment variable is NOT SET.")
+    print("⚠️ Using default localhost URL (this will fail on Railway unless you have a local DB).")
+    raw_url = "postgresql+asyncpg://user:pass@localhost/dbname"
+else:
+    print("✅ Found DATABASE_URL environment variable.")
+
+# Ensure async driver
 if raw_url.startswith("postgres://"):
     DATABASE_URL = raw_url.replace("postgres://", "postgresql+asyncpg://", 1)
 elif raw_url.startswith("postgresql://"):
@@ -22,8 +30,24 @@ elif raw_url.startswith("postgresql://"):
 else:
     DATABASE_URL = raw_url
 
+try:
+    # Log the host we are trying to connect to (masking credentials)
+    safe_url = DATABASE_URL.split("@")[-1] if "@" in DATABASE_URL else "unknown"
+    print(f"🔌 Attempting to connect to database host: {safe_url}")
+except Exception:
+    pass
+
 # Create Async Engine
-engine = create_async_engine(DATABASE_URL, echo=False)
+try:
+    engine = create_async_engine(
+        DATABASE_URL, 
+        echo=False,
+        pool_pre_ping=True,  # Check connection health
+        pool_recycle=3600,
+    )
+except Exception as e:
+    print(f"❌ Failed to create database engine: {e}")
+    raise
 
 # Session Factory
 async_session_maker = async_sessionmaker(engine, expire_on_commit=False)
