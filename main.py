@@ -120,7 +120,11 @@ async def lifespan(app: FastAPI):
     print(f"📡 Listening on {os.getenv('HOST', '0.0.0.0')}:{os.getenv('PORT', '8000')}")
     
     # Initialize singletons
-    get_vault()
+    # Initialize singletons
+    vault = get_vault()
+    # Ensure DB tables exist on startup
+    await vault._ensure_db_ready()
+    
     get_billing()
     get_fixer()
     get_safety()
@@ -307,7 +311,7 @@ async def receive_error(
     """
     # Step 1: Verify the client
     vault = get_vault()
-    client = vault.verify_client(x_api_key)
+    client = await vault.verify_client_async(x_api_key)
     
     if not client:
         raise HTTPException(status_code=401, detail="Invalid API key")
@@ -348,7 +352,7 @@ async def get_stats(x_api_key: str = Header(...)):
         raise HTTPException(status_code=401, detail="Admin access required")
     
     billing = get_billing()
-    return billing.get_stats()
+    return await billing.get_stats_async()
 
 
 @app.get("/stats/recent")
@@ -361,7 +365,7 @@ async def get_recent(
         raise HTTPException(status_code=401, detail="Admin access required")
     
     billing = get_billing()
-    recent = billing.get_recent_fixes(limit)
+    recent = await billing.get_recent_fixes_async(limit)
     
     return [
         {
@@ -392,7 +396,7 @@ async def register_client(
         raise HTTPException(status_code=401, detail="Admin access required")
     
     vault = get_vault()
-    client_id, api_key = vault.register_client(
+    client_id, api_key = await vault.register_client(
         company_name=company_name,
         database_type=database_type,
         connection_string=connection_string,
@@ -413,7 +417,7 @@ async def list_clients(x_api_key: str = Header(...)):
         raise HTTPException(status_code=401, detail="Admin access required")
     
     vault = get_vault()
-    clients = vault.list_active_clients()
+    clients = await vault.list_active_clients_async()
     
     return [
         {
@@ -554,7 +558,7 @@ async def handle_support_ticket(
     Resolves customer issues automatically. Bills $0.99 per resolved ticket.
     """
     vault = get_vault()
-    client = vault.verify_client(x_api_key)
+    client = await vault.verify_client_async(x_api_key)
     
     if not client:
         raise HTTPException(status_code=401, detail="Invalid API key")
@@ -590,7 +594,7 @@ async def handle_sales_lead(
     Qualifies leads and books meetings. Bills $2.50 per booked meeting.
     """
     vault = get_vault()
-    client = vault.verify_client(x_api_key)
+    client = await vault.verify_client_async(x_api_key)
     
     if not client:
         raise HTTPException(status_code=401, detail="Invalid API key")
@@ -625,7 +629,7 @@ async def handle_email(
     Drafts professional email responses. Bills $0.50 per drafted email.
     """
     vault = get_vault()
-    client = vault.verify_client(x_api_key)
+    client = await vault.verify_client_async(x_api_key)
     
     if not client:
         raise HTTPException(status_code=401, detail="Invalid API key")
@@ -660,7 +664,7 @@ async def handle_appointment(
     Books and confirms appointments. Bills $1.50 per confirmed appointment.
     """
     vault = get_vault()
-    client = vault.verify_client(x_api_key)
+    client = await vault.verify_client_async(x_api_key)
     
     if not client:
         raise HTTPException(status_code=401, detail="Invalid API key")
@@ -695,7 +699,7 @@ async def handle_universal_request(
     Pass agent_type and data in the request body.
     """
     vault = get_vault()
-    client = vault.verify_client(x_api_key)
+    client = await vault.verify_client_async(x_api_key)
     
     if not client:
         raise HTTPException(status_code=401, detail="Invalid API key")

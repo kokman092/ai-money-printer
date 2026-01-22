@@ -242,6 +242,29 @@ class BillingSystem:
                 "unique_clients": 0
             }
 
+    async def get_recent_fixes_async(self, limit: int = 10) -> List[BillingRecord]:
+        """Get recent completed fixes."""
+        async with async_session_maker() as session:
+            stmt = select(BillingModel).where(BillingModel.status == "completed").order_by(BillingModel.id.desc()).limit(limit)
+            result = await session.execute(stmt)
+            records = result.scalars().all()
+            
+            return [
+                BillingRecord(
+                    timestamp=r.timestamp,
+                    client_id=r.client_id,
+                    company_name=r.company_name,
+                    fix_id=r.fix_id,
+                    fix_type=r.fix_type,
+                    error_summary=r.error_summary,
+                    amount_usd=r.amount_usd,
+                    status=r.status,
+                    execution_time_ms=r.execution_time_ms,
+                    rows_affected=r.rows_affected
+                )
+                for r in records
+            ]
+
 
 # Singleton instance
 _billing_instance: Optional[BillingSystem] = None
