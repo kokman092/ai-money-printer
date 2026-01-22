@@ -135,6 +135,24 @@ async def lifespan(app: FastAPI):
     except ValueError as e:
         print(f"⚠️ Warning: {e}")
     
+    # Start Autonomous Hunting Loop (Background Task)
+    async def run_hunter_loop():
+        print("🏹 Hunter Loop: Initializing...")
+        await asyncio.sleep(10) # Wait for server to fully start
+        while True:
+            try:
+                hunter = get_hunter()
+                await hunter.run_hunting_cycle()
+            except Exception as e:
+                print(f"❌ Hunter Loop Error: {e}")
+            
+            # Sleep for 1 hour between cycles
+            print("💤 Hunter sleeping for 60 minutes...")
+            await asyncio.sleep(3600)
+
+    # Spawn the loop as a background task
+    asyncio.create_task(run_hunter_loop())
+
     yield
     
     # Shutdown
