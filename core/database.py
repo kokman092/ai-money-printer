@@ -168,6 +168,7 @@ async def init_db():
     
     # Helper to check connection
     async def check_conn(eng):
+        from sqlalchemy import text # Ensure it's available
         try:
             async with eng.begin() as conn:
                 await conn.execute(text("SELECT 1"))
