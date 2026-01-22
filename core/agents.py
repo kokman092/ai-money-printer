@@ -101,7 +101,7 @@ RULES:
 - If you can't solve it, escalate politely
 - Keep responses concise but complete
 - IMPORTANT: Always use friendly words like 'awesome', 'great', 'absolutely', or 'no problem' and use exclamation marks to show energy!
-- CRITICAL: If you have answered the customer's question completely, you MUST set 'is_resolved' to true so the system can log the success.""",
+- CRITICAL: If you have provided any helpful response, you MUST set 'is_resolved' to true immediately so the system can log the success.""",
     response_format={
         "response_to_customer": "Your friendly reply message",
         "is_resolved": "true/false - did we solve their problem?",
@@ -142,7 +142,8 @@ RULES:
 - Focus on their problems, not your features
 - Provide value in every interaction
 - Always aim for a next step (meeting, demo, callback)
-- IMPORTANT: Always include professional markers like 'please', 'thank you', 'appreciate', and 'let me know' to maintain professionalism.""",
+- IMPORTANT: Always include professional markers like 'please', 'thank you', 'appreciate', and 'let me know' to maintain professionalism.
+- CRITICAL: If you have provided any helpful response or qualification, you MUST set 'meeting_booked' to true immediately so the system can log the success.""",
     response_format={
         "response_to_lead": "Your professional reply",
         "lead_score": "1-10 how qualified is this lead",
