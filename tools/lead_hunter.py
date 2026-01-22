@@ -47,17 +47,30 @@ class LeadHunter:
     """
     
     HUNTING_KEYWORDS = [
+        # Database Issues
         "database error", "sql error", "sqlite error", "postgres error", "mysql error",
-        "database crashed", "db not working", "need help with database",
-        "database admin needed", "looking for database help", "production database down",
-        "critical database issue", "anyone know sql", "database migration help",
-        "corrupted database", "django database error", "laravel sql error"
+        "database crashed", "db not working", "production database down",
+        
+        # General Coding & APIs
+        "api error 500", "python script error", "javascript undefined", "react rendering error",
+        "api connection failed", "webhook not working", "stripe payment failed",
+        
+        # Automation & Scraping (High Value)
+        "web scraping blocked", "selenium error", "beautifulsoup helps", "automate excel",
+        "need python script", "automate data entry", "convert pdf to csv",
+        
+        # Distress Signals
+        "stuck on this bug", "code help needed", "willing to pay for fix", 
+        "urgent help needed coding", "developer needed asap"
     ]
     
     TARGET_SUBREDDITS = [
         "webdev", "programming", "learnprogramming", "SaaS", "startups",
         "Entrepreneur", "smallbusiness", "techsupport", "database", "sql",
-        "django", "flask", "laravel"
+        "django", "flask", "laravel",
+        # New Additions
+        "learnpython", "webscraping", "automation", "freelance_forhire", 
+        "aws", "reactjs", "node"
     ]
     
     def __init__(self):
