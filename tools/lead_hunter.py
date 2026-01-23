@@ -17,7 +17,8 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from dotenv import load_dotenv
 
 # Import DB layer
-from core.database import async_session_maker, LeadModel, init_db
+from core import database
+from core.database import LeadModel, init_db
 
 load_dotenv()
 
@@ -104,7 +105,7 @@ class LeadHunter:
     
     async def _is_duplicate_async(self, lead_id: str) -> bool:
         """Check if lead already exists."""
-        async with async_session_maker() as session:
+        async with database.async_session_maker() as session:
             stmt = select(LeadModel).where(LeadModel.lead_id == lead_id)
             result = await session.execute(stmt)
             return result.scalar_one_or_none() is not None
@@ -127,13 +128,13 @@ class LeadHunter:
             created_at=lead.created_at
         )
         
-        async with async_session_maker() as session:
+        async with database.async_session_maker() as session:
             session.add(new_lead)
             await session.commit()
     
     async def _update_lead_async(self, lead: Lead):
         """Update an existing lead in DB."""
-        async with async_session_maker() as session:
+        async with database.async_session_maker() as session:
             stmt = select(LeadModel).where(LeadModel.lead_id == lead.lead_id)
             result = await session.execute(stmt)
             lead_db = result.scalar_one_or_none()
@@ -261,15 +262,26 @@ Don't use greetings or subject lines."""
         return "Hey, looks like a DB issue. I built an AI tool that fixes these automatically. Let me know if you want to try it!"
 
     async def send_reddit_dm(self, lead: Lead, message: str) -> bool:
-        """Send a Reddit DM."""
-        print(f"📤 Would DM u/{lead.username}: {message[:50]}...")
+        """
+        Send a Reddit DM (or prepare the link for manual sending).
+        """
+        subject = "Quick question about your post"
+        body = message
+        # Reddit compose link format: https://www.reddit.com/message/compose/?to=USERNAME&subject=SUBJECT&message=BODY
+        import urllib.parse
+        encoded_subject = urllib.parse.quote(subject)
+        encoded_body = urllib.parse.quote(body)
+        dm_url = f"https://www.reddit.com/message/compose/?to={lead.username}&subject={encoded_subject}&message={encoded_body}"
+        
+        print(f"\n📨 [ACTION REQUIRED] Click to Send DM to u/{lead.username}:")
+        print(f"🔗 {dm_url}\n")
         
         lead.status = "contacted"
         lead.first_contact_date = datetime.now().isoformat()
         lead.last_contact_date = datetime.now().isoformat()
         await self._update_lead_async(lead)
         
-        await self._send_telegram_alert(f"📤 **Outreach Sent**\n👤 u/{lead.username}\n🔗 {lead.post_url}")
+        await self._send_telegram_alert(f"📤 **Outreach Generated**\n👤 u/{lead.username}\n🔗 [Send DM]({dm_url})")
         return True
 
     async def _send_telegram_alert(self, message: str):

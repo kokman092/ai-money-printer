@@ -1,17 +1,35 @@
 import asyncio
+from core.database import init_db
 from tools.billing import get_billing
 from tools.lead_hunter import get_hunter
 
 async def run_dashboard():
+    # Initialize DB (Checks connection & switches to fallback if needed)
+    db_connected = False
+    try:
+        await init_db()
+        db_connected = True
+    except BaseException as e:
+        print(f"❌ Critical Database Error during Init: {e}")
+        # We continue to show what we can
+    
     billing = get_billing()
     hunter = get_hunter()
     
     # Fetch Stats
-    bill_stats = await billing.get_stats_async()
-    try:
-        lead_stats = await hunter.get_stats_async()
-    except Exception:
-        lead_stats = {"total_leads": 0, "contacted": 0, "new": 0}
+    bill_stats = {"total_earnings": 0.0, "daily_earnings": 0.0}
+    if db_connected:
+        try:
+            bill_stats = await billing.get_stats_async()
+        except Exception as e:
+            print(f"⚠️ Failed to fetch billing stats: {e}")
+
+    lead_stats = {"total_leads": 0, "contacted": 0, "new": 0}
+    if db_connected:
+        try:
+            lead_stats = await hunter.get_stats_async()
+        except Exception:
+            pass
 
     print("\n" + "="*60)
     print(" 💰 AI MONEY PRINTER - DIAGNOSTIC DASHBOARD 💰")

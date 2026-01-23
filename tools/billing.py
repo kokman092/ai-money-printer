@@ -12,7 +12,9 @@ from sqlalchemy import select, func
 from sqlalchemy.ext.asyncio import AsyncSession
 
 # Import DB layer
-from core.database import async_session_maker, BillingModel
+# Import DB layer
+from core import database
+from core.database import BillingModel
 
 
 @dataclass
@@ -73,7 +75,7 @@ class BillingSystem:
             rows_affected=rows_affected
         )
         
-        async with async_session_maker() as session:
+        async with database.async_session_maker() as session:
             session.add(record)
             await session.commit()
             
@@ -208,7 +210,7 @@ class BillingSystem:
         """Get total earnings for today (Async)."""
         today_str = datetime.now().strftime("%Y-%m-%d")
         
-        async with async_session_maker() as session:
+        async with database.async_session_maker() as session:
             stmt = select(func.sum(BillingModel.amount_usd)).where(
                 BillingModel.timestamp.like(f"{today_str}%"),
                 BillingModel.status == "completed"
@@ -219,7 +221,7 @@ class BillingSystem:
 
     async def get_stats_async(self) -> dict:
         """Get comprehensive billing statistics (Async)."""
-        async with async_session_maker() as session:
+        async with database.async_session_maker() as session:
             # Total earnings
             total_stmt = select(func.sum(BillingModel.amount_usd)).where(BillingModel.status == "completed")
             total_earnings = (await session.execute(total_stmt)).scalar() or 0.0
@@ -244,7 +246,7 @@ class BillingSystem:
 
     async def get_recent_fixes_async(self, limit: int = 10) -> List[BillingRecord]:
         """Get recent completed fixes."""
-        async with async_session_maker() as session:
+        async with database.async_session_maker() as session:
             stmt = select(BillingModel).where(BillingModel.status == "completed").order_by(BillingModel.id.desc()).limit(limit)
             result = await session.execute(stmt)
             records = result.scalars().all()

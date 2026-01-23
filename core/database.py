@@ -173,8 +173,8 @@ async def init_db():
             async with eng.begin() as conn:
                 await conn.execute(text("SELECT 1"))
             return True
-        except Exception as e:
-            print(f"❌ Connection check failed: {e}")
+        except BaseException as e:
+            print(f"❌ Connection check failed ({type(e).__name__}): {e}")
             return False
 
     print("🔄 Checking database connection...")
@@ -195,11 +195,18 @@ async def init_db():
                 fb_url = fallback_raw.replace("postgresql://", "postgresql+asyncpg://", 1)
             else:
                 fb_url = fallback_raw
+            
+            print(f"🔎 DEBUG: Fallback URL prepared (host: {fb_url.split('@')[-1] if '@' in fb_url else '???'})")
                 
             try:
                 # Create temporary engine to test
+                print("🔎 DEBUG: Creating fallback engine...")
                 fb_engine = create_async_engine(fb_url, echo=False, pool_pre_ping=True)
-                if await check_conn(fb_engine):
+                print("🔎 DEBUG: Checking fallback connection...")
+                is_connected = await check_conn(fb_engine)
+                print(f"🔎 DEBUG: Fallback connection result: {is_connected}")
+                
+                if is_connected:
                     print("✅ Fallback Connection Successful! Switching engine.")
                     # Dispose old engine
                     await engine.dispose()
@@ -211,7 +218,7 @@ async def init_db():
                 else:
                     print("❌ Fallback also failed.")
             except Exception as e:
-                print(f"❌ Error creating fallback engine: {e}")
+                print(f"❌ Error creating/checking fallback engine: {e}")
         else:
             print("❌ No DATABASE_PUBLIC_URL provided for fallback.")
 

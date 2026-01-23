@@ -551,9 +551,9 @@
                 <strong>Pay only when they deliver results.</strong>
             </p>
             <div class="hero-cta-group">
-                <a href="mailto:contact@aimoneyprinter.com?subject=API%20Access%20Request" class="btn-primary">
+                <button onclick="openCheckout()" class="btn-primary">
                     🚀 Get API Access
-                </a>
+                </button>
                 <a href="#how-it-works" class="btn-secondary">
                     See How It Works →
                 </a>
@@ -742,10 +742,9 @@ print(response.json())
         <section class="cta-section">
             <h2>Ready to <span class="gradient-text">Print Money</span>?</h2>
             <p>Get your API key and deploy AI agents in minutes.</p>
-            <a href="mailto:contact@aimoneyprinter.com?subject=API%20Access%20Request&body=Hi%2C%0A%0AI%27d%20like%20to%20get%20API%20access%20to%20AI%20Money%20Printer.%0A%0AMy%20use%20case%3A%20%5Bdescribe%20your%20use%20case%5D%0A%0AThanks!"
-                class="btn-primary">
+            <button onclick="openCheckout()" class="btn-primary" style="font-size: 1.2rem; padding: 20px 40px;">
                 🚀 Get API Access Now
-            </a>
+            </button>
         </section>
 
         <!-- Footer -->
@@ -757,7 +756,168 @@ print(response.json())
         </footer>
     </div>
 
+    <!-- Checkout Modal -->
+    <div id="checkoutModal" class="modal" style="display: none;">
+        <div class="modal-content">
+            <span class="close-modal" onclick="closeCheckout()">&times;</span>
+            <h2 style="margin-bottom: 24px;">Get Instant Access</h2>
+            <p style="color: var(--text-secondary); margin-bottom: 24px;">
+                Enter your details to generate your API key.<br>
+                A <strong>$50.00 deposit</strong> is required to activate your account.
+            </p>
+
+            <form id="checkoutForm" onsubmit="handleCheckout(event)">
+                <div class="form-group">
+                    <label>Company Name</label>
+                    <input type="text" id="companyName" required placeholder="Acme Corp">
+                </div>
+                <div class="form-group">
+                    <label>Email Address</label>
+                    <input type="email" id="email" required placeholder="you@company.com">
+                </div>
+
+                <div id="paymentResult"
+                    style="display: none; margin-top: 20px; padding: 16px; background: rgba(0,255,136,0.1); border: 1px solid var(--accent-green); border-radius: 8px;">
+                    <p style="color: var(--accent-green); font-weight: bold;">✅ Invoice Created!</p>
+                    <p style="font-size: 0.9em; margin: 8px 0;">Your inactive API Key:</p>
+                    <code id="apiKeyDisplay"
+                        style="display: block; background: #000; padding: 8px; border-radius: 4px; word-break: break-all;">...</code>
+                    <a id="payButton" href="#" target="_blank" class="btn-primary"
+                        style="margin-top: 16px; width: 100%; justify-content: center;">
+                        💳 Pay $50 to Activate
+                    </a>
+                </div>
+
+                <button type="submit" id="submitBtn" class="btn-primary"
+                    style="width: 100%; justify-content: center; margin-top: 24px;">
+                    Generate Invoice
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <style>
+        .modal {
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(5px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-content {
+            background-color: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            padding: 40px;
+            width: 90%;
+            max-width: 500px;
+            position: relative;
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
+        }
+
+        .close-modal {
+            position: absolute;
+            top: 20px;
+            right: 24px;
+            color: var(--text-secondary);
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .close-modal:hover {
+            color: #fff;
+        }
+
+        .form-group {
+            margin-bottom: 16px;
+            text-align: left;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: var(--text-secondary);
+            font-size: 0.9em;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 12px;
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            color: #fff;
+            font-size: 1rem;
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: var(--accent-green);
+        }
+    </style>
+
     <script>
+        function openCheckout() {
+            document.getElementById('checkoutModal').style.display = 'flex';
+        }
+
+        function closeCheckout() {
+            document.getElementById('checkoutModal').style.display = 'none';
+        }
+
+        async function handleCheckout(e) {
+            e.preventDefault();
+
+            const btn = document.getElementById('submitBtn');
+            const company = document.getElementById('companyName').value;
+            const email = document.getElementById('email').value;
+
+            btn.innerHTML = 'Creating Invoice...';
+            btn.disabled = true;
+
+            try {
+                const response = await fetch('/buy-access', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        company_name: company,
+                        email: email,
+                        plan: 'per-fix'
+                    })
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    document.getElementById('submitBtn').style.display = 'none';
+                    document.getElementById('paymentResult').style.display = 'block';
+                    document.getElementById('apiKeyDisplay').innerText = data.temp_api_key;
+
+                    const payBtn = document.getElementById('payButton');
+                    payBtn.href = data.payment_url;
+
+                    // Auto open
+                    window.open(data.payment_url, '_blank');
+                } else {
+                    alert('Error: ' + (data.detail || 'Failed to create invoice'));
+                    btn.innerHTML = 'Try Again';
+                    btn.disabled = false;
+                }
+            } catch (err) {
+                alert('Network Error: ' + err.message);
+                btn.innerHTML = 'Try Again';
+                btn.disabled = false;
+            }
+        }
+
         // Smooth scroll for anchor links
         document.querySelectorAll('a[href^="#"]').forEach(anchor => {
             anchor.addEventListener('click', function (e) {
